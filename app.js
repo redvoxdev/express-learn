@@ -7,14 +7,22 @@ const getToken = (str) => {
   }
 }
 
-app.get('/api/v1/data', (req, res) => {
-  const authHeader = req.headers['cookie']
-  const token = getToken(authHeader)
+breakIfTokenInvalid = (req, res, next) => {
+  const cookieHeader = req.headers['cookie']
+  const token = getToken(cookieHeader)
   if (token && token === process.env.token) {
-    res.status(200).send('Hello World!')
+    next()
   } else {
     res.status(403).send("Token invalid")
   }
-})
+}
+
+const getData = (req, res) => {
+  res.status(200).send('Hello World!')
+}
+
+app.use(breakIfTokenInvalid)
+
+app.get('/api/v1/data', getData)
 
 module.exports = app
